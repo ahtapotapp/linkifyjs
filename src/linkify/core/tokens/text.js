@@ -33,6 +33,13 @@ function inheritsToken(value) {
 */
 const DOMAIN = inheritsToken();
 
+
+/**
+ turkish
+
+ */
+const TURKISH = inheritsToken();
+
 /**
 	@class AT
 	@extends TextToken
@@ -172,6 +179,7 @@ const AMPERSAND = inheritsToken('&');
 export {
 	TextToken as Base,
 	DOMAIN,
+	TURKISH,
 	AT,
 	COLON,
 	DOT,

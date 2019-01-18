@@ -11,6 +11,7 @@ import {CharacterState as State, stateify} from './state';
 import * as TOKENS from './tokens/text';
 import {
 	DOMAIN,
+	TURKISH,
 	LOCALHOST,
 	NUM,
 	PROTOCOL,
@@ -42,7 +43,8 @@ import {
 const tlds = __TLDS__; // macro, see gulpfile.js
 
 const NUMBERS = '0123456789'.split('');
-const ALPHANUM = '0123456789abcdefghijklmnopqrstuvwxyz'.split('');
+const TURKISH_LETTERS = 'çğıöşü'.split('');
+const ALPHANUM = '0123456789abcçdefgğhıijklmnoöpqrsştuüvwxyz'.split('');
 const WHITESPACE = [' ', '\f', '\r', '\t', '\v', '\u00a0', '\u1680', '\u180e']; // excluding line breaks
 
 let domainStates = []; // states that jump to DOMAIN on /[a-z0-9]/
@@ -51,6 +53,7 @@ let makeState = (tokenClass) => new State(tokenClass);
 // Frequently used states
 const S_START			= makeState();
 const S_NUM				= makeState(NUM);
+const S_TURKISH			= makeState(TURKISH);
 const S_DOMAIN			= makeState(DOMAIN);
 const S_DOMAIN_HYPHEN	= makeState(); // domain followed by 1 or more hyphen characters
 const S_WS				= makeState(WS);
@@ -79,8 +82,8 @@ S_START
 // Whitespace jumps
 // Tokens of only non-newline whitespace are arbitrarily long
 S_START
-.on('\n', makeState(NL))
-.on(WHITESPACE, S_WS);
+	.on('\n', makeState(NL))
+	.on(WHITESPACE, S_WS);
 
 // If any whitespace except newline, more whitespace!
 S_WS.on(WHITESPACE, S_WS);
@@ -137,10 +140,14 @@ domainStates.push.apply(domainStates, partialLocalhostStates);
 // DOMAINs make more DOMAINs
 // Number and character transitions
 S_START.on(NUMBERS, S_NUM);
+S_START.on(TURKISH_LETTERS, S_TURKISH);
 S_NUM
 .on('-', S_DOMAIN_HYPHEN)
 .on(NUMBERS, S_NUM)
-.on(ALPHANUM, S_DOMAIN); // number becomes DOMAIN
+.on(ALPHANUM, S_DOMAIN)
+.on(TURKISH_LETTERS, S_TURKISH); // number becomes DOMAIN
+
+S_TURKISH.on('-', S_DOMAIN_HYPHEN).on(NUMBERS, S_NUM).on(ALPHANUM, S_DOMAIN).on(TURKISH_LETTERS, S_TURKISH);
 
 S_DOMAIN
 .on('-', S_DOMAIN_HYPHEN)
@@ -175,7 +182,7 @@ let run = function (str) {
 	// This selective `toLowerCase` is used because lowercasing the entire
 	// string causes the length and character position to vary in some in some
 	// non-English strings. This happens only on V8-based runtimes.
-	let lowerStr = str.replace(/[A-Z]/g, (c) => c.toLowerCase());
+	let lowerStr = str.replace(/[A-Zçğıöşü]/g, (c) => {c.search(/[A-Zçğıöşü]/g) > 0 ? c.turkishToLower() : c.toLowerCase();});
 	let len = str.length;
 	let tokens = []; // return value
 
