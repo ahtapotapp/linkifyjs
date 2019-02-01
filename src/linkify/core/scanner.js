@@ -168,6 +168,12 @@ S_DOMAIN_HYPHEN
 // Set default transition
 S_START.defaultTransition = makeState(SYM);
 
+let turkishToLower = function(string){
+	var letters = { "İ": "i", "I": "ı", "Ş": "ş", "Ğ": "ğ", "Ü": "ü", "Ö": "ö", "Ç": "ç" };
+	string = string.replace(/(([İIŞĞÜÇÖ]))/g, function(letter){ return letters[letter]; })
+	return string.toLowerCase();
+}
+
 /**
 	Given a string, returns an array of TOKEN instances representing the
 	composition of that string.
@@ -182,7 +188,7 @@ let run = function (str) {
 	// This selective `toLowerCase` is used because lowercasing the entire
 	// string causes the length and character position to vary in some in some
 	// non-English strings. This happens only on V8-based runtimes.
-	let lowerStr = str.replace(/[A-Zçğıöşü]/g, (c) => {c.search(/[A-Zçğıöşü]/g) > 0 ? c.turkishToLower() : c.toLowerCase();});
+	let lowerStr = str.replace(/[A-Zçğıöşü]/g, (c) => turkishToLower(c));
 	let len = str.length;
 	let tokens = []; // return value
 
