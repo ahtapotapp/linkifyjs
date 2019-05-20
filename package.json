@@ -1,6 +1,6 @@
 {
-  "name": "@ahtapot/linkifyjs",
-  "version": "2.1.6-octov5",
+  "name": "@ahtapotapp/linkifyjs",
+  "version": "2.1.6-octov6",
   "description": "Intelligent link recognition, made easy",
   "repository": {
     "type": "git",
